@@ -40,10 +40,8 @@ class Video:
     #Pre: captureVideo, captureFlo
     #Ret: Video object
     def __init__(self,vidChanCap,floChanCap):
-        hasVidFrame = True
-        hasFloFrame = True
-        frameNum = 0
         numVidFrames = int(vidChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
+        numFloFrames = int(vidChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
         for i in range(numVidFrames):
             hasFrame,vidFrame = vidChanCap.read()
             hasFrame,floFrame = floChanCap.read()
@@ -64,26 +62,21 @@ def loadChannels():
     vidC2 = cv2.VideoCapture(filePathC2)
     return(vidC1,vidC2)
 
-def getVideoFrame():
-    global currentFrame
-    vidC1.set(cv2.CAP_PROP_POS_FRAMES, currentFrame)
-    gotFrame,vidFrame = vidC1.read()
-    return(vidFrame)
-
-def getFlorFrame():
-    global currentFrame
-    vidC2.set(cv2.CAP_PROP_POS_FRAMES, currentFrame)
-    gotFrame,floFrame = vidC2.read()
-    return(floFrame)
 
 #Pre: frame
 #ret: Frame with higer intesity
 def incFloIntens(frame,intens):
-    maxIntens = np.amax(frame)
-    frame = frame*intens
+    intens = int(intens/10)
+    #maxIntens = np.amax(frame)
+    #frame = frame*intens
+    # create an empty black image
+    intensFrame = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
+    for i in range(intens):
+        intensFrame = cv2.add(intensFrame,frame)
+
     #if value is higher that 255 floor to 255
-    frame[frame > 255] = 255
-    return(frame)
+    #frame[frame > 255] = 255
+    return(intensFrame)
 
 def blendFrames(frame1,frame2):
     global currentBlend
@@ -91,10 +84,17 @@ def blendFrames(frame1,frame2):
     blendedFrame = cv2.add(frame1, frame2)
     return(blendedFrame)
 
+#Update Frame Does scaling and adds all visual effect
+#Pre
+#Ret
 def updateFrame():
-    vidFrame = getVideoFrame()
+    global currentFrame
+    frame = video.getFrame(currentFrame)
+    vidFrame = frame.getVidChan()
+    floFrame = frame.getFloChan()
+    #vidFrame = getVideoFrame()
     vidFrame = rescale_frame(vidFrame, percent=1000)
-    floFrame = getFlorFrame()
+    #floFrame = getFlorFrame()
     floFrame = rescale_frame(floFrame, percent=1000)
     finalFrame = blendFrames(floFrame,vidFrame)
 
@@ -138,6 +138,8 @@ def rescale_frame(frame, percent=75):
 #Main
 vidC1,vidC2 = loadChannels()
 
+video = Video(vidC1,vidC2)
+
 cv2.namedWindow('CellTracker')
 
 sliderPos = 0
@@ -147,10 +149,6 @@ cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames,changeFrame)
 cv2.createTrackbar("Channel",'CellTracker',0,100,changeChanell)
 updateFrame()
 
-testVideo = Video(vidC1,vidC2)
-frameFromVid = testVideo.getFrame(100)
-frameFromVid.showFrame()
-cv2.waitKey(0)
 
 while(True):
 
