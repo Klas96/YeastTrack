@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from detectCell import detectCells
 from getClassFrame import getTextFrame
+from getClassFrame import getClassFrame
 
 #global variables
 currentFrame = 1
@@ -12,6 +13,9 @@ currentBlend = 0
 
 #classes
 class Frame:
+    #variables
+    #vidChan
+    #floChan
     #Constructor
     def __init__(self,vidChan,floChan):
         self.vidChan = vidChan
@@ -30,7 +34,10 @@ class Frame:
 
     def analyseFrame(self):
         #TODO
-        pass
+        #self.classChan = getClassFrame(keyPoints,maskFrame)
+        self.keyPoints = detectCells(self.vidChan)
+        maskFrame = getMaskFrame(self.vidChan)
+        textFrame = getTextFrame(self.keyPoints,sizeX,sizeY)
 
 
 class Video:
