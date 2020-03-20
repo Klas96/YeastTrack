@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from detectCell import detectCells
 from getClassFrame import getTextFrame
 from getClassFrame import getClassFrame
+from getMaskFrame import getMaskFrame
 
 #global variables
 currentFrame = 1
@@ -20,6 +21,7 @@ class Frame:
     def __init__(self,vidChan,floChan):
         self.vidChan = vidChan
         self.floChan = floChan
+        self.analyseFrame()
 
     #Methods
     def getVidChan(self):
@@ -27,6 +29,9 @@ class Frame:
 
     def getFloChan(self):
         return(self.floChan)
+
+    def getClassificationFrame(self):
+        return(self.classFrame)
 
     def showFrame(self):
         cv2.imshow("vidChan",self.vidChan)
@@ -37,7 +42,8 @@ class Frame:
         #self.classChan = getClassFrame(keyPoints,maskFrame)
         self.keyPoints = detectCells(self.vidChan)
         maskFrame = getMaskFrame(self.vidChan)
-        textFrame = getTextFrame(self.keyPoints,sizeX,sizeY)
+        self.classFrame = getClassFrame(self.keyPoints,maskFrame)
+        self.textFrame = getTextFrame(self.keyPoints,self.classFrame.shape[0],self.classFrame.shape[1])
 
 
 class Video:
@@ -99,10 +105,12 @@ def updateFrame():
     frame = video.getFrame(currentFrame)
     vidFrame = frame.getVidChan()
     floFrame = frame.getFloChan()
+    classFrame = frame.getClassificationFrame()
+    #Scale Frame
     #vidFrame = getVideoFrame()
-    vidFrame = rescale_frame(vidFrame, percent=1000)
+    #vidFrame = rescale_frame(vidFrame, percent=1000)
     #floFrame = getFlorFrame()
-    floFrame = rescale_frame(floFrame, percent=1000)
+    #floFrame = rescale_frame(floFrame, percent=1000)
     finalFrame = blendFrames(floFrame,vidFrame)
 
     sizeX = finalFrame.shape[0]
@@ -113,7 +121,9 @@ def updateFrame():
         keyPoints = detectCells(vidFrame)
         textFrame = getTextFrame(keyPoints,sizeX,sizeY)
     #finalFrame = floFrame
-    finalFrame = cv2.add(finalFrame,textFrame)
+    #finalFrame = cv2.add(finalFrame,textFrame)
+    finalFrame = cv2.add(finalFrame,classFrame)
+    finalFrame = rescale_frame(finalFrame, percent=1000)
     cv2.imshow('CellTracker', finalFrame)
     return()
 
@@ -152,16 +162,16 @@ cv2.namedWindow('CellTracker')
 sliderPos = 0
 numFrames = int(vidC1.get(cv2.CAP_PROP_FRAME_COUNT))
 
-cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames,changeFrame)
+cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames-1,changeFrame)
 cv2.createTrackbar("Channel",'CellTracker',0,100,changeChanell)
 updateFrame()
 
 
 while(True):
-
-    char = cv2.waitKey(33)
-    if( char == 33 ):
-        break;
+    choice = input("1: get G.value\n2: get t.isAlive()\n3: kill thread\nelse: exit\ninput: ")
+    print(choice)
+    char = cv2.waitKey()
+    print(char)
 
 vidC1.release()
 vidC2.release()
