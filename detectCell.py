@@ -3,7 +3,7 @@ import numpy as np
 from getMaskFrame import getMaskFrame
 
 
-#pre: image with white bloobs
+#pre: image with white bloobs maskFrame
 #ret List of key ppoints
 #TODO: optimize Paramters
 def blobDetection(frame):

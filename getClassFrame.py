@@ -1,9 +1,21 @@
 import cv2
 import numpy as np
+from getMaskFrame import getMaskFrame
+from detectCell import blobDetection
 
+#color all the blobs with individual colors
+#Text size for all cells
 def getClassFrame(keyPoints,maskFrame):
-    #TODO
-    pass
+    #loop Through all keypoints
+    for keyP in keyPoints:
+        #color the blob at keyP a sertain color
+        pass
+
+    #get size of frame
+    skape = maskFrame.shape[0]
+    textFrame = getTextFrame(keyPoints,maskFrame.shape[0],maskFrame.shape[1])
+    return(maskFrame)
+
 
 
 def getTextFrame(keyPoints,sizeX,sizeY):
@@ -30,3 +42,12 @@ def getTextFrame(keyPoints,sizeX,sizeY):
         classFrame = cv2.putText(classFrame, str(size), (orgX,orgY), font, fontScale, color, thickness, cv2.LINE_AA)
 
     return(classFrame)
+
+#Test method
+#frame = cv2.imread('ImageData/VidEamp.png')
+#maskFrame = getMaskFrame(frame)
+#keyPoints = blobDetection(maskFrame)
+#classFrame = getClassFrame(keyPoints,maskFrame)
+
+#cv2.imshow('classFrame',classFrame)
+#cv2.waitKey(0)
