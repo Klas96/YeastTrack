@@ -1,80 +1,34 @@
 #Yeast Track Main
 import cv2
 import numpy as np
-#import pandas as pd
 from matplotlib import pyplot as plt
 from detectCell import detectCells
-from getClassFrame import getTextFrame
-from getClassFrame import getClassFrame
 from getMaskFrame import getMaskFrame
+from centroidTracker import CentroidTracker
+from videoClass import Video
+from frameClass import Frame
+from Visual.plotFunctions import plotSizeLineage
 
 #global variables
 currentFrame = 1
 currentBlend = 0
 
-#classes
-class Frame:
-    #variables
-    #vidChan
-    #floChan
-    #Constructor
-    def __init__(self,vidChan,floChan):
-        self.vidChan = vidChan
-        self.floChan = floChan
-        self.analyseFrame()
+#TODO Pixel to micron ratio
 
-    #Methods
-    def getVidChan(self):
-        return(self.vidChan)
+#TODO Frame to sectond ratio
 
-    def getFloChan(self):
-        return(self.floChan)
+showMaskFrame = False
+showCellID = True
+showLinagesTree = True
+showOptChan = True
+showWHI5ActivFrame = False
 
-    def getClassificationFrame(self):
-        return(self.classFrame)
-
-    def showFrame(self):
-        cv2.imshow("vidChan",self.vidChan)
-        cv2.imshow("floChan",self.floChan)
-
-    def analyseFrame(self):
-        #TODO
-        #self.classChan = getClassFrame(keyPoints,maskFrame)
-        self.keyPoints = detectCells(self.vidChan)
-        maskFrame = getMaskFrame(self.vidChan)
-        self.classFrame = getClassFrame(self.keyPoints,maskFrame)
-        self.textFrame = getTextFrame(self.keyPoints,self.classFrame.shape[0],self.classFrame.shape[1])
-
-
-class Video:
-    #variables
-    frames = []
-    #Constructor
-    #Pre: captureVideo, captureFlo
-    #Ret: Video object
-    def __init__(self,vidChanCap,floChanCap):
-        numVidFrames = int(vidChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
-        numFloFrames = int(vidChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
-        for i in range(numVidFrames):
-            hasFrame,vidFrame = vidChanCap.read()
-            hasFrame,floFrame = floChanCap.read()
-            frame = Frame(vidFrame,floFrame)
-            self.frames.append(frame)
-
-    #Methods
-    #pre frameNum nuber of the frame being retrived
-    def getFrame(self,frameNum):
-        return(self.frames[frameNum])
-
-def loadChannels():
+def loadChannels(filePathC1,filePathC2):
     #Get File Paths
-    filePathC1 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C1Z4.avi"
-    filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C2Z2.avi"
     #Get video Capture
     vidC1 = cv2.VideoCapture(filePathC1)
     vidC2 = cv2.VideoCapture(filePathC2)
     return(vidC1,vidC2)
-
 
 #Pre: frame
 #ret: Frame with higer intesity
@@ -91,11 +45,12 @@ def incFloIntens(frame,intens):
     #frame[frame > 255] = 255
     return(intensFrame)
 
-def blendFrames(frame1,frame2):
+def increasIntens(frame1):
     global currentBlend
     frame1 = incFloIntens(frame1,currentBlend)
-    blendedFrame = cv2.add(frame1, frame2)
-    return(blendedFrame)
+    #blendedFrame = cv2.add(frame1, frame2)
+    #return(blendedFrame)
+    return(frame1)
 
 #Update Frame Does scaling and adds all visual effect
 #Pre
@@ -103,27 +58,31 @@ def blendFrames(frame1,frame2):
 def updateFrame():
     global currentFrame
     frame = video.getFrame(currentFrame)
-    vidFrame = frame.getVidChan()
-    floFrame = frame.getFloChan()
+    vidFrame = frame.getScaledOptChan()
+    floFrame = frame.getScaledFloChan()
     classFrame = frame.getClassificationFrame()
     #Scale Frame
     #vidFrame = getVideoFrame()
     #vidFrame = rescale_frame(vidFrame, percent=1000)
     #floFrame = getFlorFrame()
     #floFrame = rescale_frame(floFrame, percent=1000)
-    finalFrame = blendFrames(floFrame,vidFrame)
+    finalFrame = increasIntens(floFrame)
 
     sizeX = finalFrame.shape[0]
     sizeY = finalFrame.shape[1]
 
-    tracking = True
-    if tracking:
-        keyPoints = detectCells(vidFrame)
-        textFrame = getTextFrame(keyPoints,sizeX,sizeY)
+    if showOptChan:
+        finalFrame = cv2.add(finalFrame,vidFrame)
+    if showMaskFrame:
+        finalFrame = cv2.add(finalFrame,classFrame)
+    if showCellID:
+        finalFrame = cv2.add(frame.idFrame,finalFrame)
+    if showWHI5ActivFrame:
+        finalFrame = cv2.add(finalFrame,frame.getWHI5ActivFrame())
     #finalFrame = floFrame
     #finalFrame = cv2.add(finalFrame,textFrame)
-    finalFrame = cv2.add(finalFrame,classFrame)
-    finalFrame = rescale_frame(finalFrame, percent=1000)
+
+    #finalFrame = rescale_frame(finalFrame, percent=1000)
     cv2.imshow('CellTracker', finalFrame)
     return()
 
@@ -139,39 +98,91 @@ def changeChanell(division):
     currentBlend = division
     updateFrame()
 
-#Rescaling
+def plotTrackCell(trackedCells):
+    printMotherDoghuther(trackedCells)
+    cellToPlot = [0,5,12,3]
+    #cellToPlot = [6,13]
+    for trackedCell in trackedCells:
+        cellID = trackedCell.getCellID()
+        if any(cellID == i for i in cellToPlot):
+            whi5Trace = trackedCell.getWhi5Trace()
+            dicovFrame = trackedCell.getDetectionFrameNum()
+            plt.plot(range(dicovFrame, dicovFrame+len(whi5Trace)),whi5Trace, label="ID " + str(cellID))
 
-def make_1080p():
-    cap.set(3, 1920)
-    cap.set(4, 1080)
+    plt.ylabel('WHI5 Activity')
+    plt.xlabel('Frame Number')
+    plt.title("WHI5 intesity")
+    plt.legend()
+    plt.show()
 
-def rescale_frame(frame, percent=75):
-    width = int(frame.shape[1] * percent/ 100)
-    height = int(frame.shape[0] * percent/ 100)
-    dim = (width, height)
-    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
-
+def printMotherDoghuther(trackedCells):
+    for trackedCell in trackedCells:
+        doughterID = trackedCell.getCellID()
+        motgherID = trackedCell.getMotherCell()
+        relatabelityFactor = trackedCell.getRelatabelityFactor()
+        print("M: " + str(motgherID) + " --> " + "D: " + str(doughterID))
+        print("RelFactor: " + str(relatabelityFactor))
 
 #Main
-vidC1,vidC2 = loadChannels()
+#Paths to Channels
+#filePathC1 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP3C1Z4.avi"
+#filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP3C2Z2.avi"
+
+filePathC1 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C1Z4.avi"
+filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C2Z2.avi"
+
+
+vidC1,vidC2 = loadChannels(filePathC1,filePathC2)
 
 video = Video(vidC1,vidC2)
+video.runTracking()
 
+
+numFrames = int(vidC1.get(cv2.CAP_PROP_FRAME_COUNT))
 cv2.namedWindow('CellTracker')
 
 sliderPos = 0
-numFrames = int(vidC1.get(cv2.CAP_PROP_FRAME_COUNT))
 
 cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames-1,changeFrame)
 cv2.createTrackbar("Channel",'CellTracker',0,100,changeChanell)
 updateFrame()
 
 
+listOfComandsChars = ["q", "s", "o", "i", "w", "l","p"]
+listOfComandsFunctions = ["quit", "Show Segmentation", "show Opt Chan", "show cell ID", "show WHI5 Activ Threshold", "Print Lineage","Plot Data"]
 while(True):
-    choice = input("1: get G.value\n2: get t.isAlive()\n3: kill thread\nelse: exit\ninput: ")
-    print(choice)
-    char = cv2.waitKey()
-    print(char)
+    print("Options:")
+    for i in range(0,len(listOfComandsChars)):
+        print(listOfComandsChars[i] + " = " + listOfComandsFunctions[i])
+
+    key = cv2.waitKey(0)
+    #input = str(input())
+    print("Your input: " + chr(key))
+    if(key == ord('q')):
+        break
+    if(key == ord('s')):
+        showMaskFrame = not showMaskFrame
+        print("showMaskFrame is now " + str(showMaskFrame))
+        updateFrame()
+    if(key == ord("o")):
+        showOptChan = not showOptChan
+        print("showOptChan is now " + str(showOptChan))
+        updateFrame()
+#import pandas as pdFrame()
+    if(key == ord("i")):
+        showCellID = not showCellID
+        print("showCellID is now " + str(showCellID))
+        updateFrame()
+    if(key == ord("w")):
+        showWHI5ActivFrame = not showWHI5ActivFrame
+        print("showWHI5ActivFrame is now " + str(showWHI5ActivFrame))
+        updateFrame()
+    if(key == ord("l")):
+        trackedCells = video.getTrackedCells()
+        printMotherDoghuther(trackedCells)
+    if(key == ord("p")):
+        trackedCells = video.getTrackedCells()
+        plotSizeLineage(0,video.getTrackedCells())
 
 vidC1.release()
 vidC2.release()
