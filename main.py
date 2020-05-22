@@ -8,6 +8,9 @@ from centroidTracker import CentroidTracker
 from videoClass import Video
 from frameClass import Frame
 from Visual.plotFunctions import plotSizeLineage
+from LoadData import getVideo
+from LoadtifFile import imortTiftoVideo
+from ConvertLiftoTif import convertLifToTif
 
 #global variables
 currentFrame = 1
@@ -129,16 +132,24 @@ def printMotherDoghuther(trackedCells):
 #filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP3C2Z2.avi"
 
 filePathC1 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C1Z4.avi"
+#filePathC1 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/WorkingData/working.tif"
 filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/Experiment13h_050619/vidP4C2Z2.avi"
 
+lifFilePath = "./VideoData/Experiment13h_050619/Experiment13h_050619.lif"
+tifFilePath = "./VideoData/WorkingData/working.tif"
 
-vidC1,vidC2 = loadChannels(filePathC1,filePathC2)
+#vidC1,vidC2 = loadChannels(filePathC1,filePathC2)
 
-video = Video(vidC1,vidC2)
+#video = Video(vidC1,vidC2)
+#Video = getVideo()
+
+convertLifToTif(lifFilePath, tifFilePath)
+video = imortTiftoVideo(tifFilePath)
+
 video.runTracking()
 
-
-numFrames = int(vidC1.get(cv2.CAP_PROP_FRAME_COUNT))
+#numFrames = int(vidC1.get(cv2.CAP_PROP_FRAME_COUNT))
+numFrames = video.getNumFrmes()
 cv2.namedWindow('CellTracker')
 
 sliderPos = 0
@@ -146,7 +157,6 @@ sliderPos = 0
 cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames-1,changeFrame)
 cv2.createTrackbar("Channel",'CellTracker',0,100,changeChanell)
 updateFrame()
-
 
 listOfComandsChars = ["q", "s", "o", "i", "w", "l","p"]
 listOfComandsFunctions = ["quit", "Show Segmentation", "show Opt Chan", "show cell ID", "show WHI5 Activ Threshold", "Print Lineage","Plot Data"]
