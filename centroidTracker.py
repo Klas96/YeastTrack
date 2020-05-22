@@ -146,7 +146,8 @@ class CentroidTracker():
 		#Update all cells in Disaperd list
 		#for disi in self.disappeared:
 		for objectID in list(self.disappeared.keys()):
-			self.cellObjects[objectID].update()
+			#self.cellObjects[objectID].update()
+			pass
 
 
 		#frame number increases with one
