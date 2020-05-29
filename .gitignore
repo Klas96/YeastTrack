@@ -4,3 +4,5 @@ ReportFigures
 VideoData/Experiment13h_050619
 VideoData/TestDataGood
 ImageData
+*/__pycache__
+UserInterface/LoadData/bftools/*
