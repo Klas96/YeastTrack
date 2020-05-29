@@ -1,0 +1,6 @@
+# Ignore all Pcashe
+*.pyc
+ReportFigures
+VideoData/Experiment13h_050619
+VideoData/TestDataGood
+ImageData

@@ -2,15 +2,10 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from detectCell import detectCells
-from getMaskFrame import getMaskFrame
-from centroidTracker import CentroidTracker
-from videoClass import Video
-from frameClass import Frame
-from Visual.plotFunctions import plotSizeLineage
-from LoadData import getVideo
-from LoadtifFile import imortTiftoVideo
-from ConvertLiftoTif import convertLifToTif
+from UserInterface.videoClass import Video
+from UserInterface.LoadData.LoadData import getVideo
+from UserInterface.LoadData.LoadtifFile import imortTiftoVideoNew
+from Anlysis.plotFunctions import plotFunction
 
 #global variables
 currentFrame = 1
@@ -40,7 +35,12 @@ def incFloIntens(frame,intens):
     #maxIntens = np.amax(frame)
     #frame = frame*intens
     # create an empty black image
-    intensFrame = np.zeros((frame.shape[0], frame.shape[1], 3), np.uint8)
+    #Check number of colors
+    numCol = 3
+    if 2 == len(frame.shape):
+        numCol = 1
+
+    intensFrame = np.zeros((frame.shape[0], frame.shape[1], numCol), np.uint8)
     for i in range(intens):
         intensFrame = cv2.add(intensFrame,frame)
 
@@ -48,12 +48,12 @@ def incFloIntens(frame,intens):
     #frame[frame > 255] = 255
     return(intensFrame)
 
-def increasIntens(frame1):
+def increasIntens(image):
     global currentBlend
-    frame1 = incFloIntens(frame1,currentBlend)
+    image = incFloIntens(image,currentBlend)
     #blendedFrame = cv2.add(frame1, frame2)
     #return(blendedFrame)
-    return(frame1)
+    return(image)
 
 #Update Frame Does scaling and adds all visual effect
 #Pre
@@ -61,21 +61,21 @@ def increasIntens(frame1):
 def updateFrame():
     global currentFrame
     frame = video.getFrame(currentFrame)
-    vidFrame = frame.getScaledOptChan()
-    floFrame = frame.getScaledFloChan()
+    vidImage = frame.getScaledOptChan()
+    floImage = frame.getScaledFloChan()
     classFrame = frame.getClassificationFrame()
     #Scale Frame
     #vidFrame = getVideoFrame()
     #vidFrame = rescale_frame(vidFrame, percent=1000)
     #floFrame = getFlorFrame()
     #floFrame = rescale_frame(floFrame, percent=1000)
-    finalFrame = increasIntens(floFrame)
+    finalFrame = increasIntens(floImage)
 
     sizeX = finalFrame.shape[0]
     sizeY = finalFrame.shape[1]
 
     if showOptChan:
-        finalFrame = cv2.add(finalFrame,vidFrame)
+        finalFrame = cv2.add(finalFrame,vidImage)
     if showMaskFrame:
         finalFrame = cv2.add(finalFrame,classFrame)
     if showCellID:
@@ -138,13 +138,15 @@ filePathC2 = "/home/klas/Documents/Chalmers/ExamensArbete/YeastTrack/VideoData/E
 lifFilePath = "./VideoData/Experiment13h_050619/Experiment13h_050619.lif"
 tifFilePath = "./VideoData/WorkingData/working.tif"
 
-#vidC1,vidC2 = loadChannels(filePathC1,filePathC2)
+vidC1,vidC2 = loadChannels(filePathC1,filePathC2)
 
-#video = Video(vidC1,vidC2)
+video = Video(vidC1,vidC2)
+vidC1.release()
+vidC2.release()
 #Video = getVideo()
 
-convertLifToTif(lifFilePath, tifFilePath)
-video = imortTiftoVideo(tifFilePath)
+#convertLifToTifNew(lifFilePath, tifFilePath)
+#video = imortTiftoVideoNew(tifFilePath)
 
 video.runTracking()
 
@@ -158,6 +160,7 @@ cv2.createTrackbar("Frame",'CellTracker',sliderPos,numFrames-1,changeFrame)
 cv2.createTrackbar("Channel",'CellTracker',0,100,changeChanell)
 updateFrame()
 
+#List With comand chars and coresponding function
 listOfComandsChars = ["q", "s", "o", "i", "w", "l","p"]
 listOfComandsFunctions = ["quit", "Show Segmentation", "show Opt Chan", "show cell ID", "show WHI5 Activ Threshold", "Print Lineage","Plot Data"]
 while(True):
@@ -192,7 +195,4 @@ while(True):
         printMotherDoghuther(trackedCells)
     if(key == ord("p")):
         trackedCells = video.getTrackedCells()
-        plotSizeLineage(0,video.getTrackedCells())
-
-vidC1.release()
-vidC2.release()
+        plotFunction(0,video.getTrackedCells())
