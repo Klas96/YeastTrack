@@ -22,3 +22,14 @@ Can be dowloaded at https://downloads.openmicroscopy.org/bio-formats/6.5.0/artif
 Code can be run with python
 
 Python3 main.py
+
+## TODO
+
+Gray Format
+Make segmentation accept only gray.
+Load Data loads in gray.
+Convert to color before showing.
+
+Load Data
+Croping alternative
+
