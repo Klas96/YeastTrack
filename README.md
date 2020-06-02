@@ -14,6 +14,9 @@ OpenCV can be installed using pip3:
 
 pip3 install opencv-python
 
+Also For loading .lif files the Bioformats Command Line Tools is needed.
+Can be dowloaded at https://downloads.openmicroscopy.org/bio-formats/6.5.0/artifacts/bftools.zip
+
 ## Running
 
 Code can be run with python
