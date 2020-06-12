@@ -3,9 +3,8 @@ from UserInterface.frameClass import Frame
 import cv2
 import numpy as np
 from Tracking.centroidTracker import CentroidTracker
-from UserInterface.getIDFrame import getIDFrame
-#from UserInterface.getIDFrame import getIDFrameNY
-from UserInterface.getClassFrame import getClassFrame
+from UserInterface.getIDImage import getIDImage
+from UserInterface.getClassImage import getClassImage
 from Tracking.findLineage import findLineage
 from Tracking.filterTracking import filterTrackedCells
 
@@ -16,19 +15,25 @@ class Video:
     numFloFrames = 0
     maxDisappeared = 50
     #Constructor
-    def vidCapInit(self,optChanCap,floChanCap):
+    def vidCapInit(self,optImgCap,floImgCap):
 
         self.numZoom = 1
-        self.numVidFrames = int(optChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.numFloFrames = int(optChanCap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.numVidFrames = int(optImgCap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.numFloFrames = int(optImgCap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.tracker = CentroidTracker()
 
         for i in range(self.numVidFrames):
-            hasFrame,vidFrame = optChanCap.read()
-            hasFrame,floFrame = floChanCap.read()
-            frame = Frame(vidFrame,floFrame,i)
+            #Read Images
+            hasFrame,optImg = optImgCap.read()
+            hasFrame,floImg = floImgCap.read()
+            #Convert Images
+            optImg = cv2.cvtColor(optImg, cv2.COLOR_BGR2GRAY)
+            floImg = cv2.cvtColor(floImg, cv2.COLOR_BGR2GRAY)
+
+            frame = Frame(optImg,floImg,i)
             self.frames.append(frame)
 
+    #Init Object With List of mats with frames
     def matListInit(self, mats):
         self.numFrames = len(mats)
         print("Loadling "+str(self.numFrames)+" Frames")
@@ -37,17 +42,12 @@ class Video:
             print("Loading Frame Number: " + str(frameNum))
             #frameArr = mats[frameNum]
             #Channels
-            #optArr = frameArr[0]
-            #floArr = frameArr[1]
-            #Zoom Levels
-            #optImage = optArr[3]
-            optImage = mats[frameNum][0]
+            optImg = mats[frameNum][0]
             #floImage = floArr[1]
-            floImage = mats[frameNum][1]
-            frame = Frame(optImage,floImage,frameNum)
+            floImg = mats[frameNum][1]
+            frame = Frame(optImg,floImg,frameNum)
             self.frames.append(frame)
         del mats
-
 
     #Pre: captureVideo, captureFlo
     #Ret: Video object
@@ -56,14 +56,15 @@ class Video:
             self.matListInit(arg1)
         else:
             self.vidCapInit(arg1,arg2)
-        self.xSz = self.frames[0].getScaledOptChan().shape[0]
-        self.ySz = self.frames[0].getScaledOptChan().shape[1]
+        self.xSz = self.frames[0].getUserOptImage().shape[0]
+        self.ySz = self.frames[0].getUserOptImage().shape[1]
 
     #Methods
     def getNumFrmes(self):
         return(len(self.frames))
 
-    #pre frameNum nuber of the frame being retrived
+    #Pre: frameNum nuber of the frame being retrived
+    #Ret: Frame of given number
     def getFrame(self,frameNum):
         return(self.frames[frameNum])
 
@@ -75,10 +76,10 @@ class Video:
         for frame in self.frames:
             cellInstanses = frame.cellInstanses
             self.trackedCells = self.tracker.updateCellInst(cellInstanses)
-            frame.idFrame = getIDFrame(self.trackedCells,frame)
-            frame.classFrame = getClassFrame(self.trackedCells,frame.xScaleSz,frame.yScaleSz)
+            frame.idImg = getIDImage(self.trackedCells,frame)
+            frame.classImg = getClassImage(self.trackedCells,frame.xSz,frame.ySz)
 
-        self.trackedCells = filterTrackedCells(self.trackedCells)
+        #self.trackedCells = filterTrackedCells(self.trackedCells)
         #TODO: Make ID frame and Segmentation Frame Here after filtering
         #for frame in self.frames:
             #frame.idFrame = getIDFrameNY(self.trackedCells,frame)
@@ -88,9 +89,3 @@ class Video:
 
     def findLineage(self):
         findLineage(self.trackedCells)
-
-def rescale_frame(frame, percent=75):
-    width = int(frame.shape[1] * percent/ 100)
-    height = int(frame.shape[0] * percent/ 100)
-    dim = (width, height)
-    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)

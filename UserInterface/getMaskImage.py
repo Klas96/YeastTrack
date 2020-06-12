@@ -3,7 +3,7 @@ import numpy as np
 
 #Pre: VideoFrame
 #Ret: White on black maskFrame
-def getMaskFrame(frame):
+def getMaskImage(frame):
     frame = otsuThreshold(frame)
     maskFrame = convexHull(frame)
     return(maskFrame)

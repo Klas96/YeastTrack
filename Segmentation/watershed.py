@@ -52,14 +52,17 @@ def watershed(frame):
     markers[unknown==255] = 0
 
     markers = cv2.watershed(floFrame,markers)
+    #markers = cv2.watershed(distTransform,markers)
 
     floFrame[markers == -1] = [0,0,255]
 
     markersShow = np.array(markers, dtype=np.uint8)
-    #cv2.imshow("markers",markersShow)
-    #cv2.waitKey(0)
+
     markersShow = cv2.cvtColor(markersShow, cv2.COLOR_GRAY2BGR)
     markersShow[markers == -1] = [255,255,255]
+    markersShow = cv2.add(markersShow,floFrame)
+    cv2.imshow("markers",markersShow)
+    cv2.waitKey(0)
     cellInstanses = conectedCompontents(markersShow,floFrame)
     cellInstanses = filterDetections(cellInstanses)
     #print(cellInstanses)

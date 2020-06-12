@@ -1,3 +1,14 @@
+def findDoughandAddBudToMother(mother,trackedCells):
+    motherCellTrace = mother.getSizesTrace()
+    daugthers = findDoughetCells(mother, trackedCells)
+    for trCell in trackedCells:
+        cellID = trCell.getCellID()
+        if any(cellID == i for i in daugthers):
+            motherCellTrace = addBudtoMother(mother,trCell)
+    plt.show()
+    return(motherCellTrace)
+
+
 #Pre: frame with cells isolated in white
 #Ret: KeyPoints for each cell.
 def blobDetection(frame):

@@ -73,6 +73,14 @@ class TrackedCell():
 			sizeTrace.append(cellInst.getSize())
 		return(sizeTrace)
 
+	def getSizesTraceFromBegining(self):
+		sizeTrace = []
+		for i in range(self.detectionFrameNum):
+			sizeTrace.append(0)
+		for cellInst in self.cellTrace:
+			sizeTrace.append(cellInst.getSize())
+		return(sizeTrace)
+
 	def getWhi5Trace(self):
 
 		whi5Trace = []

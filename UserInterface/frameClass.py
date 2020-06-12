@@ -5,28 +5,28 @@ from Tracking.centroidTracker import CentroidTracker
 from Segmentation.OstuBinarizartion import OtsuBinarization
 from Segmentation.watershed import  watershed
 from Segmentation.cellInstance import  cellInstance
-from UserInterface.getInstantSegmentFrame import getCellInstImg
 from Segmentation.LaplacianGausian import laplacianGausian
-
+from Segmentation.ThersholdingSegmentation import segementThreshold
+from UserInterface.getInstantSegmentImage import getCellInstImage
+from UserInterface.rescaleImageToUser import rescaleImageToUser
 
 class Frame:
     #variables
-    #optChan
-    #floChan
+    #optImage
+    #floImage
     #Constructor
     def __init__(self,optImage,floImage,frameNum=-1):
+        #TODO load as gray images
         #variables
-        self.optChan = optImage
-        self.floChan = floImage
-        self.frameNumber = frameNum
+        self.optImg = optImage
+        self.floImg = floImage
+        self.frameNum = frameNum
 
-        self.xSz = self.optChan.shape[0]
-        self.ySz = self.optChan.shape[1]
+        self.xSz = self.optImg.shape[0]
+        self.ySz = self.optImg.shape[1]
 
         self.scaling = 1000
         #TODO MAke to factors of scaling
-        self.xScaleSz = self.getScaledOptChan().shape[0]
-        self.yScaleSz = self.getScaledOptChan().shape[1]
 
         #TODO
         self.pixelToMiccron = 1000
@@ -36,57 +36,70 @@ class Frame:
         self.analyseFrame()
 
     #Methods
-    def getOptChan(self):
-        return(self.optChan)
+    #Getters
+    def getOptImage(self):
+        return(self.optImg)
 
-    def getFloChan(self):
-        return(self.floChan)
+    def getFloImage(self):
+        return(self.floImg)
 
     def getFrameNum(self):
-        return(self.frameNumber)
+        return(self.frameNum)
 
-    def getScaledOptChan(self):
-        optChanScale = rescale_frame(self.optChan, percent=1000)
-        return(optChanScale)
+    def getUserOptImage(self):
+        #Make A Certain Size
+        img = self.getOptImage()
+        #make Empty image with size
+        userImg = np.zeros(img.shape, np.uint8)
+        #Merge two zeros and one grey
+        userImg = cv2.merge([img,img,img])
+        userImg = rescaleImageToUser(userImg)
+        return(userImg)
 
-    def getScaledFloChan(self):
-        floChanScale = rescale_frame(self.floChan, percent=1000)
-        return(floChanScale)
+    def getUserFloImage(self):
+        #Make A Certain Size
+        img = self.getFloImage()
+        #make Empty image with size
+        userImg = np.zeros(img.shape, np.uint8)
+        #Merge two zeros and one grey
+        userImg = cv2.merge([userImg,img,userImg])
+        userImg = rescaleImageToUser(userImg)
+        return(userImg)
 
-    def getClassificationFrame(self):
-        return(self.classFrame)
+    def getClassificationImage(self):
+        return(self.classImg)
 
-    def getWHI5ActivFrame(self):
+    #Ret: Image ilustrating whi5 Activation
+    def getWHI5ActivImage(self):
         #Whi5Detect
         threshold = 0.30
         #CellDeteect
         #threshold = 0.175-0.0125
-
-
-        #gray = cv2.cvtColor(self.getScaledFloChan(),cv2.COLOR_BGR2GRAY)
-        gray = self.getScaledFloChan()
+        #gray = cv2.cvtColor(self.getScaledfloImage(),cv2.COLOR_BGR2GRAY)
+        gray = self.getUserFloImageq()
         #apply thresholding
         gotFrame, thresh = cv2.threshold(gray,int(255*threshold),255,cv2.THRESH_BINARY)
         return(thresh)
 
-    #<|^_^|>
     #ret: Gives Image
     def getCellInstancesImage(self):
         #self.cellInstanses
         return(getCellInstImg(self.cellInstanses))
 
+    #ret: Image With ID at cell positions
+    def getIDImage(self):
+        return(self.idImg)
+
+    #Setters
     def showFrame(self):
-        cv2.imshow("optChan",self.optChan)
-        cv2.imshow("floChan",self.floChan)
+        cv2.imshow("optImage",self.optImage)
+        cv2.imshow("floImage",self.floImage)
         cv2.waitKey(0)
 
+    #Segmentation of frame.
+    #Use the Anlysis Method selected
     def analyseFrame(self):
-        self.cellInstanses = OtsuBinarization(self)
+        #self.cellInstanses = OtsuBinarization(self)
+        self.cellInstanses = segementThreshold(self)
         #self.cellInstanses = watershed(self)
         #self.cellInstanses = laplacianGausian(self)
-
-def rescale_frame(frame, percent=75):
-    width = int(frame.shape[1] * percent/100)
-    height = int(frame.shape[0] * percent/100)
-    dim = (width, height)
-    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)

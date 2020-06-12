@@ -1,10 +1,10 @@
 from matplotlib import pyplot as plt
 from Anlysis.plotSize import plotTrackCellSizeBudToMother
 
-def plotFunction(cellID,trackedCells):
-    cellToPlot = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
-    cellToPlot = [0]
+def plotFunction(trackedCells):
+    cellToPlot = range(len(trackedCells))
     plotTrackCellSizeBudToMother(cellToPlot, trackedCells)
+    #plotTrackCellWhi5(cellToPlot, trackedCells)
 
 #Pre1: ID number for cell
 #Pre2: List of tracked cells.

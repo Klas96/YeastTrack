@@ -6,3 +6,6 @@ VideoData/TestDataGood
 ImageData
 Segmentation/__pycache__
 UserInterface/LoadData/bftools/*
+VideoData/WorkingData/*
+Trash
+__pycache__
