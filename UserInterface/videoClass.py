@@ -23,6 +23,7 @@ class Video:
         self.tracker = CentroidTracker()
 
         for i in range(self.numVidFrames):
+            print("loading Frame " + str(i))
             #Read Images
             hasFrame,optImg = optImgCap.read()
             hasFrame,floImg = floImgCap.read()
@@ -49,11 +50,40 @@ class Video:
             self.frames.append(frame)
         del mats
 
+    def threeZoomInit(self, zom0Cap,zom1Cap,zom2Cap,flo1Cap):
+        self.numZoom = 3
+        self.numVidFrames = int(zom2Cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.numFloFrames = int(flo1Cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.tracker = CentroidTracker()
+        for i in range(self.numVidFrames):
+            print("loading Frame " + str(i))
+            #Read Images
+            hasFrame,optImg = zom2Cap.read()
+            hasFrame,floImg = flo1Cap.read()
+            #Convert Images
+            optImg = cv2.cvtColor(optImg, cv2.COLOR_BGR2GRAY)
+            floImg = cv2.cvtColor(floImg, cv2.COLOR_BGR2GRAY)
+
+            frame = Frame(optImg,floImg,i)
+
+            #Extra Zoom Levels :))))
+            #Read Images
+            hasFrame,zom0Img = zom0Cap.read()
+            hasFrame,zom1Img = zom1Cap.read()
+            #Convert Images
+            zom0Img = cv2.cvtColor(zom0Img, cv2.COLOR_BGR2GRAY)
+            zom1Img = cv2.cvtColor(zom1Img, cv2.COLOR_BGR2GRAY)
+            frame.addZoomLevels(zom0Img,zom1Img)
+            self.frames.append(frame)
+
+    #TODO take String that tells what init to use
     #Pre: captureVideo, captureFlo
     #Ret: Video object
-    def __init__(self,arg1,arg2 = -1):
+    def __init__(self,arg1,arg2 = -1,arg3 = -1,arg4 = -1):
         if(arg2 == -1):
             self.matListInit(arg1)
+        elif(arg3 != -1):
+            self.threeZoomInit(arg1,arg2,arg3,arg4)
         else:
             self.vidCapInit(arg1,arg2)
         self.xSz = self.frames[0].getUserOptImage().shape[0]

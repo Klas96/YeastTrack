@@ -4,8 +4,8 @@ import numpy as np
 #Pre: detections
 #Ret: Filtered Detections
 def filterDetections(cellInstances):
-    maxSize = 10000
-    minSize = 1
+    maxSize = 210
+    minSize = 15
     filterdList = []
     for cellInst in cellInstances:
         size = cellInst.getSize()

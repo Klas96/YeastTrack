@@ -35,7 +35,7 @@ def getRelatabelityFactor(doughter,mother):
     distFactor = getSigmaEdegeToEdge(doughter,mother)
 
     whi5Factor = getWHI5Factor(doughter,mother)
-
+    whi5Factor = 1
     #print("D: " + str(doughter.getCellID()) + " M: " + str(mother.getCellID()))
     #print("distFactor: " + str(distFactorNEW))
     #print("whi5Factor: " + str(whi5Factor))
@@ -65,7 +65,7 @@ def getDistFacorSigma(doughter,mother):
 #pre2: MotherTrackdeCell
 def getWHI5Factor(doughter,mother):
     analysisSpan = 50
-    intensThreshold = 0.30
+    intensThreshold = 0.18
     binaryFactor = 0
 
     #Extract traces
@@ -92,6 +92,7 @@ def getWHI5Factor(doughter,mother):
     #Dont want to compleatly exclude the onece with 0 whi5
     baseConsidFactor = 0.1
     whi5Factor = max(whi5Factor/len(whi5Mother),0.1)
+    print(whi5Factor)
     return(whi5Factor)
 
 

@@ -19,6 +19,11 @@ def segementThreshold(frame):
     floImg = preprocessFloImg(floImg)
     #Segment Edges with thresholding
     binImg = thesholdEdges(optImg)
+    #Erode Here To avoid conecting cells??
+
+
+    #cv2.imshow("binimgEdges",binImg)
+
     binImg = convexHull(binImg)
 
     #Threshold floImg
@@ -29,6 +34,8 @@ def segementThreshold(frame):
     #Intersection of Thresholds
     binImg = cv2.bitwise_and(binImg, binImgFlo)
 
+    #cv2.imshow("binimgFinal",binImg)
+    #cv2.waitKey(0)
     cellInstanses= conectedCompontents(binImg,floImg)
     cellInstanses = filterDetections(cellInstanses)
     return(cellInstanses)

@@ -4,27 +4,47 @@ import numpy as np
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 import matplotlib.pyplot as plt
+from Anlysis.visulizeLinNetworkX import plotNxTree
+#import PyQt5
+#from ete3 import Tree
+#'from ete3 import TreeStyle
+#   from igraph import *;
+from networkx.drawing.nx_agraph import graphviz_layout
 
-#Plots Linage trye
 
+#def PlotLinageTree(trackedCells):
+#
+
+#Plots Linage tree
 def PlotLinageTree(trackedCells):
     G = nx.DiGraph()
     #Add all Cells As Nodes
     for trCell in trackedCells:
-        cellLabel = "ID " + str(trCell.getCellID())
+        cellLabel = str(trCell.getCellID())#"ID " +
         G.add_node(cellLabel)
 
     #Add all edges
     for trCell in trackedCells:
         motherID = trCell.getMotherCell()
-        cellLabelM = "ID " + str(motherID)
-        cellLabelD = "ID " + str(trCell.getCellID())
-        G.add_edge(cellLabelM, cellLabelD, object='10')
+        if motherID == None:
+            motherID = -1
+        cellLabelM = str(motherID)#"ID " +
+        cellLabelD = str(trCell.getCellID())#"ID " +
+        relFactor = trCell.getRelatabelityFactor()
+        G.add_edge(cellLabelM, cellLabelD, object=str(round(relFactor, 2)))
 
-    nx.draw_networkx(G, pos = nx.spring_layout(G))
-    nx.draw_networkx_edge_labels(G, pos = nx.spectral_layout(G))
+    btree = G#nx.balanced_tree(2,4)
+    pos=graphviz_layout(G,prog='dot')
+    nx.draw(G,pos,with_labels=True,arrows=True)
+    #plotNxTree(G)
+    #nx.draw_networkx(G, pos = nx.spring_layout(G))
+    #nx.draw_networkx_edge_labels(G, pos = nx.spectral_layout(G))
+    #plt.sxhow()
+    #pos = nx.nx_pydot.graphviz_layout(g, prog='neato')
+    #nx.draw(g, pos=layout)
+    edge_labels = nx.get_edge_attributes(G, 'object')
+    nx.draw_networkx_edge_labels(G, pos=pos, edge_labels=edge_labels)
     plt.show()
-
 
 
 def PlotLinageTreeOLD(trackedCells):

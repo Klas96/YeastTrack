@@ -7,10 +7,13 @@ from Segmentation.watershed import  watershed
 from Segmentation.cellInstance import  cellInstance
 from Segmentation.LaplacianGausian import laplacianGausian
 from Segmentation.ThersholdingSegmentation import segementThreshold
+from Segmentation.RandomForestSegmentaion import rfSegmentetion
 from UserInterface.getInstantSegmentImage import getCellInstImage
 from UserInterface.rescaleImageToUser import rescaleImageToUser
 
 class Frame:
+    #TODO three zoom Init???
+
     #variables
     #optImage
     #floImage
@@ -35,6 +38,11 @@ class Frame:
         self.idFrame = 0
         self.analyseFrame()
 
+
+    def addZoomLevels(self,zom0Img,zom1Img):
+        self.optImgZom0 = zom0Img
+        self.optImgZom1 = zom1Img
+
     #Methods
     #Getters
     def getOptImage(self):
@@ -42,6 +50,12 @@ class Frame:
 
     def getFloImage(self):
         return(self.floImg)
+
+    def getZoom0Image(self):
+        return(self.optImgZom0)
+
+    def getZoom1Image(self):
+        return(self.optImgZom1)
 
     def getFrameNum(self):
         return(self.frameNum)
@@ -76,7 +90,7 @@ class Frame:
         #CellDeteect
         #threshold = 0.175-0.0125
         #gray = cv2.cvtColor(self.getScaledfloImage(),cv2.COLOR_BGR2GRAY)
-        gray = self.getUserFloImageq()
+        gray = self.getUserFloImage()
         #apply thresholding
         gotFrame, thresh = cv2.threshold(gray,int(255*threshold),255,cv2.THRESH_BINARY)
         return(thresh)
@@ -99,7 +113,8 @@ class Frame:
     #Segmentation of frame.
     #Use the Anlysis Method selected
     def analyseFrame(self):
-        #self.cellInstanses = OtsuBinarization(self)
-        self.cellInstanses = segementThreshold(self)
+        self.cellInstanses = OtsuBinarization(self)
+        #self.cellInstanses = segementThreshold(self)
+        #self.cellInstanses = rfSegmentetion(self)
         #self.cellInstanses = watershed(self)
         #self.cellInstanses = laplacianGausian(self)

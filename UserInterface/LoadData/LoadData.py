@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 from UserInterface.videoClass import Video
-#from Tkinter import Tk
+#from Tkinter import Tk 
 #from tkinter.filedialog import askopenfilename
 
 #Displays the OME-XML metadata for a file on the console:

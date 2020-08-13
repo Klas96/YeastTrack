@@ -1,10 +1,12 @@
 from matplotlib import pyplot as plt
 from Anlysis.plotSize import plotTrackCellSizeBudToMother
+from Anlysis.VisulizeLinage import PlotLinageTree
 
 def plotFunction(trackedCells):
     cellToPlot = range(len(trackedCells))
-    plotTrackCellSizeBudToMother(cellToPlot, trackedCells)
-    #plotTrackCellWhi5(cellToPlot, trackedCells)
+    #plotTrackCellSizeBudToMother(cellToPlot, trackedCells)
+    #PlotLinageTree(trackedCells)
+    plotTrackCellWhi5(cellToPlot, trackedCells)
 
 #Pre1: ID number for cell
 #Pre2: List of tracked cells.

@@ -3,6 +3,7 @@
 ReportFigures
 VideoData/Experiment13h_050619
 VideoData/TestDataGood
+VideoData/tileScan1
 ImageData
 Segmentation/__pycache__
 UserInterface/LoadData/bftools/*

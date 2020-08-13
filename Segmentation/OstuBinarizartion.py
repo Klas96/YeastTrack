@@ -15,7 +15,7 @@ def OtsuBinarization(frame):
     optImg = frame.getOptImage()
     floImg = frame.getFloImage()
     optImg = rescaleImage(optImg,10)
-    floImg = rescaleImage(floImg,10)
+    #floImg = rescaleImage(floImg,10)
     maskImg = getMaskFrame(optImg)
     maskImg = rescaleImage(maskImg,0.1)
     cellInstanses = conectedCompontents(maskImg,floImg)

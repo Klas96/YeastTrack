@@ -27,7 +27,6 @@ def imortTiftoVideo(filePath):
     del mats
     return(video)
 
-
 def imortTiftoVideoNew(filePath):
     numChan = 2
     numZoomLevles = 4
