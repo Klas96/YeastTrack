@@ -9,4 +9,5 @@ Segmentation/__pycache__
 UserInterface/LoadData/bftools/*
 VideoData/WorkingData/*
 Trash
+Trash/*
 __pycache__

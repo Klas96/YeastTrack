@@ -1,5 +1,5 @@
 import cv2
-from Anlysis.plotFunctions import plotFunction
+
 from Anlysis.VisulizeLinage import PlotLinageTree
 from Anlysis.PrintMotherDoughter import printMotherDoghuther
 from UserInterface.UpdateFrame import updateFrame
