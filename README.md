@@ -28,11 +28,17 @@ This loads the program with the file specified in loadData.py
 Once the program is running the program can be controled by hitting following buttons.
 
 q = quit
+
 s = Show Segmentation
+
 o = show Opt Chan
+
 i = show cell ID
+
 w = show WHI5 Activ Threshold
+
 l = Print Lineage
+
 p = Plot Data.
 
 
