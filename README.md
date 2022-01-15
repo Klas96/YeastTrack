@@ -15,9 +15,20 @@ pip3 install networkx
 Also For loading .lif files the Bioformats Command Line Tools is needed.
 Can be dowloaded at https://downloads.openmicroscopy.org/bio-formats/6.5.0/artifacts/bftools.zip
 
+## Install
+
+install python:
+Ex: sudo apt install python
+
+Instal Pacakge Manger:
+Ex: sudo apt install python3-pip
+
+Install Requierments:
+pip install requierments.txt
+
 ## Running
 
-Code can be run with python
+Code Can be run in python
 
 Python3 main.py
 
@@ -49,4 +60,4 @@ Segmentation
 Tracking
 Load Data
 Croping alternative
-
+Testing
